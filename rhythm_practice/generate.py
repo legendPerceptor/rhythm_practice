@@ -9,6 +9,7 @@ import time
 
 from .jianpuly import process_input, write_output
 
+
 class BeatPattern:
     def __init__(self, name: str, pattern: str, length: int):
         self.name = name
@@ -56,20 +57,42 @@ TwoBeatPatterns = [
     BeatPattern(name="大大切分分", pattern="sx sx x sx sx", length=2),
 ]
 
-OneAndTwoBeatPatterns = OneBeatPatterns + TwoBeatPatterns
-
 BeatPatternsWithTies = [
     BeatPattern(name="四连四", pattern="x ~ x", length=2),
     BeatPattern(name="四连八十六", pattern="x ~ qx sx sx", length=2),
     BeatPattern(name="四连二八", pattern="x ~ qx qx", length=2),
     BeatPattern(name="十六八连四", pattern="sx sx qx ~ x", length=2),
     BeatPattern(name="二八连四", pattern="qx qx ~ x", length=2),
+    BeatPattern(name="二八连二八", pattern="qx qx ~ qx qx", length=2),
+    BeatPattern(name="二八连八十六", pattern="qx qx ~ qx sx sx", length=2),
+    BeatPattern(name="十六八连二八", pattern="sx sx qx ~ qx qx", length=2),
+    BeatPattern(name="十六八连八十六", pattern="sx sx qx ~ qx sx sx", length=2),
+    BeatPattern(name="四连小切分", pattern="x ~ sx qx sx", length=2),
+    BeatPattern(name="二八连小切分", pattern="qx qx ~ sx qx sx", length=2),
+    BeatPattern(name="四连三连音",pattern="x ~ 3[ qx qx qx ]", length=2),
+    BeatPattern(name="二八连三连音", pattern="qx qx ~ 3[ qx qx qx ]", length=2),
+    BeatPattern(name="四连四个十六", pattern="x ~ sx sx sx sx", length=2),
+    BeatPattern(name="二八连四个十六", pattern="qx qx ~ sx sx sx sx", length=2),
+    BeatPattern(name="八十六连小切分", pattern="qx sx sx ~ sx qx sx", length=2),
+    BeatPattern(name="十六八连小切分", pattern="sx sx qx ~ sx qx sx", length=2),
+    BeatPattern(name="八十六连三连音", pattern="qx sx sx ~ 3[ qx qx qx ]", length=2),
+    BeatPattern(name="十六八连三连音", pattern="sx sx qx ~ 3[ qx qx qx ]", length=2),
+    BeatPattern(name="八十六连四个十六", pattern="qx sx sx ~ sx sx sx sx", length=2),
+    BeatPattern(name="十六八连四个十六", pattern="sx sx qx ~ sx sx sx sx", length=2),
+    BeatPattern(name="四个十六连小切分", pattern="sx sx sx sx ~ sx qx sx", length=2),
+    BeatPattern(name="小切分连四个十六", pattern="sx qx sx ~ sx sx sx sx", length=2),
+    BeatPattern(name="四个十六连三连音", pattern="sx sx sx sx ~ 3[ qx qx qx ]", length=2),
+    BeatPattern(name="三连音连四个十六", pattern="3[ qx qx qx ] ~ sx sx sx sx", length=2),
+    BeatPattern(name="四个十六连四个十六", pattern="sx sx sx sx ~ sx sx sx sx", length=2)
 ]
 
+OneAndTwoBeatPatterns = OneBeatPatterns + TwoBeatPatterns
 HardMixedPatterns = OneAndTwoBeatPatterns + BeatPatternsWithTies
 
 
-def get_random_sequence(sequence_list: list[BeatPattern], total_beats: int, per_measure_beats: int):
+def get_random_sequence(
+    sequence_list: list[BeatPattern], total_beats: int, per_measure_beats: int
+):
     generated_list = []
     generated_measures = 0
     current_measure_beats = 0
@@ -110,9 +133,13 @@ def generate_sequence_of_n_beats(
             random.choice(TwoBeatPatterns) for _ in range(num_of_beats // 2)
         ]
     elif mode == RhythmModes.RandomMixedOneBeatsAndTwoBeats:
-        generated_list = get_random_sequence(OneAndTwoBeatPatterns, num_of_beats, num_beats_per_measure)
+        generated_list = get_random_sequence(
+            OneAndTwoBeatPatterns, num_of_beats, num_beats_per_measure
+        )
     elif mode == RhythmModes.HardMixedWithTies:
-        generated_list = get_random_sequence(HardMixedPatterns, num_of_beats, num_beats_per_measure)
+        generated_list = get_random_sequence(
+            HardMixedPatterns, num_of_beats, num_beats_per_measure
+        )
     else:
         raise TypeError("不存在所选的节奏模式")
     return generated_list
@@ -166,17 +193,18 @@ title={title}
     article = head + "\n".join(lines) + "\n"
     return article
 
+
 def compile_lilypond_file(lilypond_out: str, output_file):
     result = subprocess.run(
         ["lilypond", "--png", "-dbackend=eps", f"-o{output_file}", "-"],
-        input=lilypond_out.encode('utf-8'),
+        input=lilypond_out.encode("utf-8"),
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        stderr=subprocess.PIPE,
     )
     if result.returncode == 0:
         print("Output file generated successfully.")
     else:
-        print("Error:", result.stderr.decode('utf-8'))
+        print("Error:", result.stderr.decode("utf-8"))
 
 
 def generate_jianpu_file(
@@ -186,11 +214,11 @@ def generate_jianpu_file(
     time_signature: str,
     output_file: Path,
 ):
-    random.seed(time.time()) 
+    random.seed(time.time())
     generated_list = generate_sequence_of_n_beats(num_of_beats, mode)
     print(generated_list)
-    article = get_jianpu_lilypond_str_from_BeatPatternList(num_of_beats,
-        generated_list, title=title, time_signature=time_signature
+    article = get_jianpu_lilypond_str_from_BeatPatternList(
+        num_of_beats, generated_list, title=title, time_signature=time_signature
     )
     print(article)
 
